@@ -22,7 +22,8 @@
     "dev:setup": "turbo -F @tuto/backend dev:setup"
   },
   "dependencies": {
-    "convex": "^1.28.0"
+    "convex": "^1.28.0",
+    "livekit-server-sdk": "^2.14.0"
   },
   "devDependencies": {
     "turbo": "^2.6.0"
