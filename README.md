@@ -9,7 +9,6 @@ This project was created with [Better-T-Stack](https://github.com/AmanVarshney01
 - **TailwindCSS** - Utility-first CSS for rapid UI development
 - **shadcn/ui** - Reusable UI components
 - **Convex** - Reactive backend-as-a-service platform
-- **Authentication** - Better-Auth
 - **Turborepo** - Optimized monorepo build system
 
 ## Getting Started

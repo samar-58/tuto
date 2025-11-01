@@ -18,7 +18,6 @@
   "examples": [
     "todo"
   ],
-  "auth": "better-auth",
   "packageManager": "bun",
   "dbSetup": "none",
   "api": "none",
