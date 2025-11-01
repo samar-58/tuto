@@ -1,0 +1,1 @@
+export const CONVEX_HTTP_URL = import.meta.env.VITE_CONVEX_SITE_URL!;
