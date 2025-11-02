@@ -1,9 +1,12 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { convexQuery } from "@convex-dev/react-query";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@tuto/backend/convex/_generated/api";
 import { CONVEX_HTTP_URL } from "@/lib/constant";
 import { useToken } from "@/lib/hooks";
+import { Button } from "@/components/ui/button";
+import { authClient } from "@/lib/auth-client";
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/")({
 	component: HomeComponent,
@@ -11,6 +14,25 @@ export const Route = createFileRoute("/")({
 
 function HomeComponent() {
 	const healthCheck = useQuery(convexQuery(api.healthCheck.get, {}));
+		const { data:session } = authClient.useSession();
+	    const [username,setUsername]= useState("");
+	    const [email,setEmail]= useState("");
+		const navigation = useNavigate();
+	//   if(!session){
+	// 	return <div>
+	// 		Please login first
+	// 		<Button onClick={()=>{navigation({to:"/test-auth"})}}>Login Page</Button>
+	// 	</div>
+	//   }
+	    useEffect(() => {
+        if (session?.user?.name) {
+            setUsername(session.user.name);
+        }
+		if(session?.user.email){
+			setEmail(session.user.email)
+		}
+    }, [session?.user?.name,session?.user.email]);
+
 	const testData = useQuery({
 		queryKey: ["testData"],
 		queryFn: async () => {
@@ -20,7 +42,6 @@ function HomeComponent() {
 		},
 	});
 
-	// Test the getToken endpoint
 	const tokenTest = useQuery({
 		queryKey: ["tokenTest"],
 		queryFn: async () => {
@@ -31,7 +52,7 @@ function HomeComponent() {
 			}
 			return await res.text();
 		},
-		enabled: false, // Only run when manually triggered
+		enabled: false,
 	});
 	
 	console.log(testData.data);
@@ -39,7 +60,11 @@ function HomeComponent() {
 		<div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
 			<div className="container mx-auto max-w-2xl px-6 py-16">
 				<div className="space-y-8">
-					<div className="space-y-2">
+				{session?`Hi ${username}, I hope this is your email: ${email}`:
+				"Please Login First"
+				}
+				{!session && <Button onClick={()=>navigation({to:"/test-auth"})}>Login</Button>}
+				       <div className="space-y-2">
 						<h1 className="text-3xl font-semibold text-zinc-900 dark:text-zinc-50">
 							Get Stack
 						</h1>

@@ -10,6 +10,7 @@ import {
 import '@livekit/components-styles';
 import MyVideoConference from "@/components/videoconference";
 import { useToken } from "@/lib/hooks";
+import { authClient } from "@/lib/auth-client";
 
 interface Message {
   from: string;
@@ -28,22 +29,27 @@ function MeetingPageComponent() {
   const [status, setStatus] = useState<string>("Idle");
   const [messages, setMessages] = useState<Message[]>([]);
   const [username, setUsername] = useState<string>("")
-  const [tempUsername, setTempUsername] = useState<string>("");
-  const [showUsernamePopup, setShowUsernamePopup] = useState<boolean>(true);
   const [showWhiteboard, setShowWhiteboard] = useState<boolean>(false);
+  const {data:session} = authClient.useSession()
 
   const [roomInstance] = useState(() => new Room({
     adaptiveStream: true,
     dynacast: true,
   }));
 
-  // Use the useToken hook - only enabled when username is set
+   useEffect(()=>{
+    if(session?.user.name){
+      setUsername(session.user.name)
+      console.log("userrname",session.user.name)
+    }
+   },[session?.user.name]);
+
   const { data: token, isLoading: isTokenLoading, error: tokenError } = useToken(
     uuid,
     username,
-    !!username // Only fetch when username is available
+    !!username
   );
-
+  
   // Helper to validate UUID format
   const isValidUUID = (uuid: string) => {
     return /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(uuid);
@@ -59,7 +65,7 @@ function MeetingPageComponent() {
     }
   }, [uuid, navigate]);
 
-  // Handle token error
+
   useEffect(() => {
     if (tokenError) {
       console.error("Token error:", tokenError);
@@ -67,26 +73,13 @@ function MeetingPageComponent() {
     }
   }, [tokenError]);
 
-  const handleUsernameSubmit = () => {
-    const trimmedUsername = tempUsername.trim();
-    if (trimmedUsername.length < 2) {
-      alert("Username must be at least 2 characters long");
-      return;
-    }
-    setUsername(trimmedUsername);
-    setShowUsernamePopup(false);
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleUsernameSubmit();
-    }
-  };
 
   async function handleJoinRoom(token: string): Promise<void> {
+    if(!username){
+      navigate({to:"/test-auth"})
+    }
     try {
       setStatus("Connecting to room...");
-
       if (!LIVEKIT_URL) {
         throw new Error("LiveKit URL is missing");
       }
@@ -111,7 +104,6 @@ function MeetingPageComponent() {
     }
   }
 
-  // Handle token loading and connection
   useEffect(() => {
     if (token && roomInstance.state === "disconnected" && username) {
       handleJoinRoom(token);
@@ -160,69 +152,69 @@ function MeetingPageComponent() {
     setShowWhiteboard(!showWhiteboard);
   };
 
-  // Show username popup
-  if (showUsernamePopup) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-100 via-pink-50 to-orange-100 dark:bg-background flex items-center justify-center p-4">
-        <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-zinc-200 dark:border-zinc-800 max-w-md w-full p-8">
-          <div className="text-center space-y-6">
-            <div className="space-y-2">
-              <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mx-auto">
-                <svg className="w-8 h-8 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-              </div>
-              <h2 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
-                Join Meeting
-              </h2>
-              <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                Enter your name to continue
-              </p>
-            </div>
+  // // Show username popup
+  // if (showUsernamePopup) {
+  //   return (
+  //     <div className="min-h-screen bg-gradient-to-br from-purple-100 via-pink-50 to-orange-100 dark:bg-background flex items-center justify-center p-4">
+  //       <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-zinc-200 dark:border-zinc-800 max-w-md w-full p-8">
+  //         <div className="text-center space-y-6">
+  //           <div className="space-y-2">
+  //             <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mx-auto">
+  //               <svg className="w-8 h-8 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  //                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+  //               </svg>
+  //             </div>
+  //             <h2 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
+  //               Join Meeting
+  //             </h2>
+  //             <p className="text-sm text-zinc-600 dark:text-zinc-400">
+  //               Enter your name to continue
+  //             </p>
+  //           </div>
 
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label htmlFor="username" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 text-left">
-                  Your Name
-                </label>
-                <input
-                  id="username"
-                  type="text"
-                  value={tempUsername}
-                  onChange={(e) => setTempUsername(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="Enter your name"
-                  autoFocus
-                  className="w-full px-4 py-3 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                />
-              </div>
+  //           <div className="space-y-4">
+  //             <div className="space-y-2">
+  //               <label htmlFor="username" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 text-left">
+  //                 Your Name
+  //               </label>
+  //               <input
+  //                 id="username"
+  //                 type="text"
+  //                 value={tempUsername}
+  //                 onChange={(e) => setTempUsername(e.target.value)}
+  //                 onKeyPress={handleKeyPress}
+  //                 placeholder="Enter your name"
+  //                 autoFocus
+  //                 className="w-full px-4 py-3 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+  //               />
+  //             </div>
 
-              <button
-                onClick={handleUsernameSubmit}
-                disabled={tempUsername.trim().length < 2}
-                className="w-full px-6 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-              >
-                Join Meeting
-              </button>
+  //             <button
+  //               onClick={handleUsernameSubmit}
+  //               disabled={tempUsername.trim().length < 2}
+  //               className="w-full px-6 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+  //             >
+  //               Join Meeting
+  //             </button>
 
-              <button
-                onClick={() => navigate({ to: "/meetings" })}
-                className="w-full px-6 py-3 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-lg font-medium hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all"
-              >
-                Cancel
-              </button>
-            </div>
+  //             <button
+  //               onClick={() => navigate({ to: "/meetings" })}
+  //               className="w-full px-6 py-3 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-lg font-medium hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all"
+  //             >
+  //               Cancel
+  //             </button>
+  //           </div>
 
-            <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800">
-              <p className="text-xs text-zinc-500 dark:text-zinc-500">
-                Meeting ID: <span className="font-mono">{uuid.substring(0, 8)}...</span>
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  //           <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800">
+  //             <p className="text-xs text-zinc-500 dark:text-zinc-500">
+  //               Meeting ID: <span className="font-mono">{uuid.substring(0, 8)}...</span>
+  //             </p>
+  //           </div>
+  //         </div>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   // Show loading state while connecting
   if (!token || roomInstance.state === "disconnected" || isTokenLoading) {
