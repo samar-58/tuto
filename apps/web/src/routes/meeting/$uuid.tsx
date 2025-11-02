@@ -6,7 +6,7 @@ import { LIVEKIT_URL } from "@/lib/constant";
 import {
   RoomAudioRenderer,
   RoomContext,
-} from '@livekit/components-react';
+} from "@livekit/components-react";
 import '@livekit/components-styles';
 import MyVideoConference from "@/components/videoconference";
 import { useToken } from "@/lib/hooks";
