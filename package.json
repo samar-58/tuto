@@ -22,7 +22,11 @@
     "dev:setup": "turbo -F @tuto/backend dev:setup"
   },
   "dependencies": {
+    "@convex-dev/better-auth": "^0.9.6",
+    "@livekit/components-react": "^2.9.15",
+    "better-auth": "1.3.27",
     "convex": "^1.28.0",
+    "livekit-client": "^2.15.14",
     "livekit-server-sdk": "^2.14.0"
   },
   "devDependencies": {

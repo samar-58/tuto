@@ -9,10 +9,17 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TestAuthRouteImport } from './routes/test-auth'
 import { Route as MeetingsRouteImport } from './routes/meetings'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MeetingUuidRouteImport } from './routes/meeting/$uuid'
+import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
+const TestAuthRoute = TestAuthRouteImport.update({
+  id: '/test-auth',
+  path: '/test-auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MeetingsRoute = MeetingsRouteImport.update({
   id: '/meetings',
   path: '/meetings',
@@ -28,39 +35,65 @@ const MeetingUuidRoute = MeetingUuidRouteImport.update({
   path: '/meeting/$uuid',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+  id: '/api/auth/$',
+  path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/meetings': typeof MeetingsRoute
+  '/test-auth': typeof TestAuthRoute
   '/meeting/$uuid': typeof MeetingUuidRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/meetings': typeof MeetingsRoute
+  '/test-auth': typeof TestAuthRoute
   '/meeting/$uuid': typeof MeetingUuidRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/meetings': typeof MeetingsRoute
+  '/test-auth': typeof TestAuthRoute
   '/meeting/$uuid': typeof MeetingUuidRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/meetings' | '/meeting/$uuid'
+  fullPaths: '/' | '/meetings' | '/test-auth' | '/meeting/$uuid' | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/meetings' | '/meeting/$uuid'
-  id: '__root__' | '/' | '/meetings' | '/meeting/$uuid'
+  to: '/' | '/meetings' | '/test-auth' | '/meeting/$uuid' | '/api/auth/$'
+  id:
+    | '__root__'
+    | '/'
+    | '/meetings'
+    | '/test-auth'
+    | '/meeting/$uuid'
+    | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   MeetingsRoute: typeof MeetingsRoute
+  TestAuthRoute: typeof TestAuthRoute
   MeetingUuidRoute: typeof MeetingUuidRoute
+  ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/test-auth': {
+      id: '/test-auth'
+      path: '/test-auth'
+      fullPath: '/test-auth'
+      preLoaderRoute: typeof TestAuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/meetings': {
       id: '/meetings'
       path: '/meetings'
@@ -82,13 +115,22 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MeetingUuidRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/auth/$': {
+      id: '/api/auth/$'
+      path: '/api/auth/$'
+      fullPath: '/api/auth/$'
+      preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   MeetingsRoute: MeetingsRoute,
+  TestAuthRoute: TestAuthRoute,
   MeetingUuidRoute: MeetingUuidRoute,
+  ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
