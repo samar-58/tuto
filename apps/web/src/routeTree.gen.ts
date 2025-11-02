@@ -9,38 +9,65 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as MeetingsRouteImport } from './routes/meetings'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as MeetingUuidRouteImport } from './routes/meeting/$uuid'
 
+const MeetingsRoute = MeetingsRouteImport.update({
+  id: '/meetings',
+  path: '/meetings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MeetingUuidRoute = MeetingUuidRouteImport.update({
+  id: '/meeting/$uuid',
+  path: '/meeting/$uuid',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/meetings': typeof MeetingsRoute
+  '/meeting/$uuid': typeof MeetingUuidRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/meetings': typeof MeetingsRoute
+  '/meeting/$uuid': typeof MeetingUuidRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/meetings': typeof MeetingsRoute
+  '/meeting/$uuid': typeof MeetingUuidRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/meetings' | '/meeting/$uuid'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/meetings' | '/meeting/$uuid'
+  id: '__root__' | '/' | '/meetings' | '/meeting/$uuid'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  MeetingsRoute: typeof MeetingsRoute
+  MeetingUuidRoute: typeof MeetingUuidRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/meetings': {
+      id: '/meetings'
+      path: '/meetings'
+      fullPath: '/meetings'
+      preLoaderRoute: typeof MeetingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +75,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/meeting/$uuid': {
+      id: '/meeting/$uuid'
+      path: '/meeting/$uuid'
+      fullPath: '/meeting/$uuid'
+      preLoaderRoute: typeof MeetingUuidRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  MeetingsRoute: MeetingsRoute,
+  MeetingUuidRoute: MeetingUuidRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

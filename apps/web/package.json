@@ -9,6 +9,8 @@
   },
   "dependencies": {
     "@convex-dev/react-query": "^0.0.0-alpha.11",
+    "@livekit/components-react": "^2.9.15",
+    "@livekit/components-styles": "^1.1.6",
     "@tailwindcss/vite": "^4.1.8",
     "@tanstack/react-form": "^1.23.5",
     "@tanstack/react-query": "^5.80.6",
@@ -17,6 +19,7 @@
     "@tanstack/react-start": "^1.132.31",
     "@tanstack/router-plugin": "^1.132.31",
     "@tuto/backend": "workspace:*",
+    "axios": "^1.13.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "convex": "catalog:",
