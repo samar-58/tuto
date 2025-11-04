@@ -2,7 +2,7 @@ import { api } from "../_generated/api";
 import { httpAction } from "../_generated/server";
 
 export const startEgress = httpAction(async (ctx, request) => {
-    const { roomName } = await request.json();
+    const { roomName,username } = await request.json();
     
     if (!roomName) {
         return new Response(JSON.stringify({ error: "roomName is required" }), { 
@@ -10,9 +10,15 @@ export const startEgress = httpAction(async (ctx, request) => {
             headers: { "Content-Type": "application/json" }
         });
     }
+    if (!username) {
+        return new Response(JSON.stringify({ error: "username is required" }), { 
+            status: 400,
+            headers: { "Content-Type": "application/json" }
+        });
+    }
     
     try {
-        const egressInfo = await ctx.runAction(api.startEgress.startEgress, { roomName });
+        const egressInfo = await ctx.runAction(api.startEgress.startEgress, { roomName,username });
         return new Response(JSON.stringify(egressInfo), { 
             status: 200, 
             headers: new Headers({

@@ -29,7 +29,7 @@ http.route({
     path: "/hello",
     method: "GET",
     handler:  httpAction(async (ctx, request) => {
-        return new Response(JSON.stringify({ message: "Hello from samar" } ), { status: 200 , headers: new Headers({
+        return new Response(JSON.stringify({ message: "Hello from s" } ), { status: 200 , headers: new Headers({
             "Access-Control-Allow-Origin": "http://localhost:3001",
             Vary: "origin",
           })});
