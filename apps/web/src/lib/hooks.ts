@@ -22,4 +22,29 @@ export const useToken = (roomName: string, participantName: string, enabled: boo
     retry: 3,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
+
+};
+export const useRecord = (roomName: string) => {
+  return useQuery({
+    queryKey: ["record", roomName],
+    queryFn: async () => {
+      const url = `${CONVEX_HTTP_URL}/startEgress`;
+      const res = await fetch(url,{
+        body:{
+          roomName
+        }
+      });
+      
+      console.log("Token response status:", res.status, res.statusText);
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error("Token error response:", errorText);
+        throw new Error(`Failed to get token: ${res.status} ${res.statusText} - ${errorText}`);
+      }
+      return await res.text();
+    },
+    retry: 3,
+    staleTime: 5 * 60 * 1000, 
+  });
+
 };

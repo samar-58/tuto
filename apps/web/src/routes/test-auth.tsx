@@ -18,7 +18,6 @@ import { useEffect, useState } from 'react';
 import { authClient } from '@/lib/auth-client';
 import { Button } from '@/components/ui/button';
 
-  
   function App() {
     const [showSignIn, setShowSignIn] = useState(false);
     const [username,setUsername]=useState("");

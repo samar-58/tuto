@@ -30,8 +30,9 @@ function MeetingPageComponent() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [username, setUsername] = useState<string>("")
   const [showWhiteboard, setShowWhiteboard] = useState<boolean>(false);
+  const [recording, setRecording] = useState(false)
   const {data:session} = authClient.useSession()
-
+  
   const [roomInstance] = useState(() => new Room({
     adaptiveStream: true,
     dynacast: true,
@@ -103,7 +104,13 @@ function MeetingPageComponent() {
       }, 3000);
     }
   }
-
+async function startRecording(roomName:string){
+  try {
+    
+  } catch (error) {
+    
+  }
+}
   useEffect(() => {
     if (token && roomInstance.state === "disconnected" && username) {
       handleJoinRoom(token);
