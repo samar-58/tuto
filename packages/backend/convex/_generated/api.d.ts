@@ -14,8 +14,10 @@ import type * as healthCheck from "../healthCheck.js";
 import type * as http from "../http.js";
 import type * as httpEndpoint_getToken from "../httpEndpoint/getToken.js";
 import type * as httpEndpoint_startEgress from "../httpEndpoint/startEgress.js";
+import type * as httpEndpoint_stopEgress from "../httpEndpoint/stopEgress.js";
 import type * as privateData from "../privateData.js";
 import type * as startEgress from "../startEgress.js";
+import type * as stopEgress from "../stopEgress.js";
 
 import type {
   ApiFromModules,
@@ -38,8 +40,10 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   "httpEndpoint/getToken": typeof httpEndpoint_getToken;
   "httpEndpoint/startEgress": typeof httpEndpoint_startEgress;
+  "httpEndpoint/stopEgress": typeof httpEndpoint_stopEgress;
   privateData: typeof privateData;
   startEgress: typeof startEgress;
+  stopEgress: typeof stopEgress;
 }>;
 declare const fullApiWithMounts: typeof fullApi;
 

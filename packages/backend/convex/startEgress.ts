@@ -20,7 +20,7 @@ const egressClient = new EgressClient(LIVEKIT_URL, API_KEY, API_SECRET);
   segments: new SegmentedFileOutput({
     filenamePrefix: `${roomName}`,
     playlistName: `${roomName}.m3u8`,
-    livePlaylistName: `${roomName}-live.m3u81`,
+    livePlaylistName: `${roomName}-live.m3u8`,
     segmentDuration: 10,
     output: {
       case: 's3',
@@ -43,10 +43,10 @@ const egressOptions = {
     try {
         const egressInfo = await egressClient.startParticipantEgress(roomName,username,outputs,egressOptions);
         console.log(`Egress started with ID: ${egressInfo.egressId}`);
-         return {id: egressInfo.egressId}
+         return {egressId: egressInfo.egressId}
     } catch (error) {
         console.error("Failed to start egress:", error);
-        throw new Error("Failed to start recording");
+        throw new Error(error instanceof Error ? error.message : "Failed to start recording");
     }
 });
 
