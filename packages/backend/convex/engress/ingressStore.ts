@@ -36,8 +36,16 @@ export const patchIngressData = internalMutation({
     },
     handler: async (ctx, args) => {
         // Find the document by egressId using the index
+        const doc = await ctx.db
+            .query("engress")
+            .withIndex("engressId", (q) => q.eq("egressId", args.egressId))
+            .first();
         
-        await ctx.db.patch(args.egressId as Id<"engress">, {
+        if (!doc) {
+            throw new Error(`Egress record not found for egressId: ${args.egressId}`);
+        }
+        
+        await ctx.db.patch(doc._id, {
             status: args.status,
             result: args.result,
         });
