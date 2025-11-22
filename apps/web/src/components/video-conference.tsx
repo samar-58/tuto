@@ -62,50 +62,42 @@ export default function MyVideoConference({ handleSend, message, setMessage, mes
   }
 
   return (
-    <div className="flex flex-col lg:flex-row h-full bg-card text-foreground rounded-xl">
-      <div className="flex-1 flex flex-col bg-gradient-to-br from-purple-50/30 via-white to-purple-100/20 dark:from-purple-950/20 dark:via-background dark:to-purple-900/10">
-        <div className="relative flex-1 p-3 lg:p-4">
-          {/* Decorative background elements */}
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-100/20 via-transparent to-purple-200/10 rounded-xl"></div>
-          <div className="absolute top-4 right-4 w-24 h-24 bg-purple-200/10 rounded-full blur-2xl"></div>
-          <div className="absolute bottom-4 left-4 w-32 h-32 bg-purple-300/5 rounded-full blur-3xl"></div>
-          
+    <div className="flex flex-col lg:flex-row h-full bg-zinc-900 text-zinc-100 rounded-none overflow-hidden">
+      <div className="flex-1 flex flex-col bg-zinc-950 relative">
+        <div className="relative flex-1 p-0">
           <GridLayout
             tracks={tracks}
             style={{ height: "calc(100% - 80px)" }}
-            className="relative z-10 h-full rounded-xl overflow-hidden shadow-lg"
+            className="relative z-10 h-full overflow-hidden"
           >
-            <ParticipantTile className="rounded-xl border-2 border-purple-200/30 dark:border-purple-800/30 bg-gradient-to-br from-white/90 via-purple-50/50 to-purple-100/30 dark:from-background/90 dark:via-purple-950/30 dark:to-purple-900/20 shadow-lg hover:shadow-xl transition-all duration-300 backdrop-blur-sm" />
+            <ParticipantTile className="border border-zinc-800 bg-zinc-900" />
           </GridLayout>
         </div>
-        
-        <div className="relative border-t border-purple-200/30 dark:border-purple-800/30 bg-gradient-to-r from-purple-50/80 via-white/90 to-purple-100/70 dark:from-purple-950/30 dark:via-background/80 dark:to-purple-900/20 backdrop-blur-sm">
-          {/* Control bar decorative background */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-100/20 to-transparent opacity-50"></div>
+
+        <div className="relative border-t border-zinc-800 bg-zinc-900/90 backdrop-blur-sm">
           <div className="relative z-10">
             <ControlBar />
           </div>
         </div>
       </div>
 
-      <div className="w-full lg:w-80 flex flex-col gap-2 lg:gap-4 p-2 lg:p-4 border-t lg:border-t-0 lg:border-l border-border bg-card h-1/2 lg:h-full">
-        <div className="relative overflow-hidden px-3 lg:px-4 py-2 lg:py-3 bg-gradient-to-r from-purple-50 via-purple-100 to-purple-50 dark:from-purple-950/30 dark:via-purple-900/40 dark:to-purple-950/30 border border-purple-200 dark:border-purple-800 rounded-lg shadow-sm">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-50"></div>
-          <div className="relative flex items-center gap-2">
-            <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
-            <span className="text-sm lg:text-base font-medium text-purple-800 dark:text-purple-200">
+      <div className="w-full lg:w-80 flex flex-col gap-0 border-t lg:border-t-0 lg:border-l border-zinc-800 bg-zinc-900 h-1/2 lg:h-full">
+        <div className="px-4 py-3 border-b border-zinc-800 bg-zinc-900">
+          <div className="flex items-center gap-2">
+            <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+            <span className="text-xs font-medium text-zinc-400 uppercase tracking-wider">
               {status}
             </span>
           </div>
         </div>
-    
-         
+
+
         {transcripts.length > 0 && (
-          <div className="border border-border rounded-lg p-2 lg:p-3 bg-background overflow-y-auto max-h-40 ">
-            <div className="text-xs lg:text-sm text-muted-foreground mb-1">LearnBetter Transcriptions</div>
+          <div className="border-b border-zinc-800 p-3 bg-zinc-900/50 overflow-y-auto max-h-40">
+            <div className="text-xs text-zinc-500 uppercase tracking-wider mb-2">Transcripts</div>
             <ul className="space-y-1">
               {transcripts.map((t, i) => (
-                <li key={i} className="text-foreground text-xs lg:text-sm break-words">
+                <li key={i} className="text-zinc-300 text-xs lg:text-sm break-words">
                   {t}
                 </li>
               ))}
@@ -113,48 +105,45 @@ export default function MyVideoConference({ handleSend, message, setMessage, mes
           </div>
         )}
 
-        <div className="flex-1 border border-border rounded-lg p-2 lg:p-3 bg-background overflow-y-auto min-h-0">
+        <div className="flex-1 p-3 bg-zinc-900 overflow-y-auto min-h-0">
           {messages.length === 0 ? (
-            <div className="text-muted-foreground text-sm">No messages yet</div>
+            <div className="text-zinc-600 text-sm text-center mt-4">No messages yet</div>
           ) : (
-            <ul className="space-y-1 lg:space-y-2">
+            <ul className="space-y-2">
               {messages.map((m, i) => (
                 <li
                   key={i}
-                  className={`flex gap-2 p-1 lg:p-2 rounded-lg text-sm lg:text-base ${
-                    m.from === "me" ? "bg-purple-100 text-purple-900 dark:bg-purple-900/30" : "bg-muted"
-                  }`}
+                  className={`flex flex-col gap-1 p-2 rounded-lg text-sm ${m.from === "me" ? "bg-zinc-800 text-zinc-200" : "bg-zinc-900/50 border border-zinc-800"
+                    }`}
                 >
-                  <strong className="text-muted-foreground min-w-fit text-xs lg:text-sm">{m.from}:</strong>
-                  <span className="text-foreground break-words">{m.text}</span>
+                  <strong className="text-zinc-500 text-xs">{m.from}</strong>
+                  <span className="text-zinc-300 break-words">{m.text}</span>
                 </li>
               ))}
             </ul>
           )}
         </div>
 
-        <div className="flex flex-col gap-1 lg:gap-2 shrink-0">
-          <label>
-            <div className="text-xs lg:text-sm text-muted-foreground mb-1">Message</div>
+        <div className="p-3 border-t border-zinc-800 bg-zinc-900">
+          <div className="flex flex-col gap-2">
             <input
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Type a message..."
-              className="w-full px-2 lg:px-3 py-1 lg:py-2 border border-input rounded-lg text-sm bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-sidebar-primary focus:border-transparent"
+              className="w-full px-3 py-2 border border-zinc-800 rounded-md text-sm bg-zinc-950 text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-zinc-700 transition-colors"
             />
-          </label>
-          <button
-            onClick={handleSend}
-            disabled={!message.trim()}
-            className={`px-3 lg:px-4 py-1 lg:py-2 rounded-lg text-xs lg:text-sm font-medium transition-colors border ${
-              message.trim()
-                ? "bg-purple-600 hover:bg-purple-700 text-white cursor-pointer border-transparent"
-                : "bg-muted text-muted-foreground cursor-not-allowed border-border"
-            }`}
-          >
-            Send Message
-          </button>
+            <button
+              onClick={handleSend}
+              disabled={!message.trim()}
+              className={`px-3 py-2 rounded-md text-xs font-medium transition-colors ${message.trim()
+                  ? "bg-zinc-100 hover:bg-zinc-200 text-zinc-900 cursor-pointer"
+                  : "bg-zinc-800 text-zinc-600 cursor-not-allowed"
+                }`}
+            >
+              Send
+            </button>
+          </div>
         </div>
       </div>
     </div>
