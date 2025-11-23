@@ -2,7 +2,8 @@ import { createFileRoute } from '@tanstack/react-router';
 import { RecordingPlayer } from '@/components/RecordingPlayer';
 import { useState, useMemo, useEffect } from 'react';
 import { Play, Calendar, Clock, Loader2, AlertCircle } from 'lucide-react';
-import { useGetRecordings } from '@/hooks/use-meetings';
+import { useTRPC } from '@/utils/trpc';
+import { useQuery } from '@tanstack/react-query';
 
 interface Recording {
     id: string;
@@ -21,19 +22,20 @@ export const Route = createFileRoute('/recordings-demo')({
 });
 
 function RecordingsDemoPage() {
-    const { data, isLoading, error } = useGetRecordings();
+    const trpc = useTRPC();
+    const { data, isLoading, error } = useQuery(trpc.meeting.getMeetings.queryOptions());
 
     // Transform API data to Recording format
     const recordings = useMemo<Recording[]>(() => {
-        if (!data?.meetings) return [];
+        if (!data) return [];
 
-        return data.meetings.map((meeting) => ({
+        return data.map((meeting) => ({
             id: meeting.id,
             playlistUrl: `${r2Url}/${meeting.id}.m3u8`,
-            title: meeting.name,
+            title: meeting.name,  
             description: meeting.description,
             duration: 'N/A', // Duration not available from API
-            createdAt: new Date(meeting.createdAt),
+            createdAt: new Date(meeting.createdAt.toString()),
         }));
     }, [data]);
 

@@ -42,6 +42,8 @@ export const startEngress = async (roomName: string, userName: string) => {
     }
     try {
         const egressInfo = await egressClient.startParticipantEgress(roomName, userName, outputs, egressOptions);
+        console.log("Egress Info:", egressInfo);
+        console.log("Room Name:", roomName);
         try {
             await prisma.$transaction(async (tx) => {
                 await tx.meeting.update({
@@ -81,4 +83,3 @@ export const getEgressInfo = async (egressId: string): Promise<EgressInfo | unde
         throw new Error(error instanceof Error ? error.message : "Failed to get status");
     }
 }
-

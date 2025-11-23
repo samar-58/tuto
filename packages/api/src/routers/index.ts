@@ -1,6 +1,7 @@
 import { protectedProcedure, publicProcedure, router } from "../index";
 import { engressRouter } from "./engress";
 import { getTokenRouter } from "./get-token";
+import { meetingRouter } from "./meeting";
 
 export const appRouter = router({
 	healthCheck: publicProcedure.query(() => {
@@ -14,6 +15,7 @@ export const appRouter = router({
 	}),
 	engress: engressRouter,
 	getToken: getTokenRouter,	
+	meeting: meetingRouter,
 });
 
 

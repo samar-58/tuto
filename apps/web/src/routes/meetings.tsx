@@ -3,21 +3,19 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { useState } from "react"
 import { Input } from "@/components/ui/input"
 import { ArrowRight, Loader2 } from "lucide-react"
-import { authClient } from "@/lib/auth-client"
 import { toast } from "sonner"
-import { useCreateMeeting } from "@/hooks/use-meetings"
+import { useTRPC } from "@/utils/trpc"
+import { useMutation } from "@tanstack/react-query"
 
 export const Route = createFileRoute("/meetings")({
   component: RoomsPage,
 });
 
 function RoomsPage() {
-  const navigate = useNavigate()
+  const navigate = useNavigate()  
   const [topic, setTopic] = useState("")
   const [username, setUsername] = useState("SamarSayed")
-
-  const { data: session } = authClient.useSession()
-  const createMeetingMutation = useCreateMeeting()
+  const trpc = useTRPC()
 
   const generateUUID = () => {
     if (typeof crypto !== "undefined" && crypto.randomUUID) {
@@ -28,54 +26,33 @@ function RoomsPage() {
       return v.toString(16);
     });
   };
+ 
 
-  const createRoom = async () => {
-    // Validate inputs
-    if (!topic.trim()) {
-      toast.error("Please enter a meeting topic");
-      return;
-    }
+   const createMeetingMutation = useMutation(trpc.meeting.createMeeting.mutationOptions());
 
-    if (!username.trim()) {
-      toast.error("Please enter your username");
-      return;
-    }
-
-    // Check if user is authenticated
-    if (!session?.user?.id) {
-      toast.error("Please sign in to create a meeting");
-      return;
-    }
-
-    const roomName = generateUUID();
-
-    // Use TanStack Query mutation to create meeting
-    createMeetingMutation.mutate(
-      {
-        id: roomName,
-        name: topic,
-        description: `Meeting created by ${username}`,
-      },
-      {
-        onSuccess: (data) => {
-          console.log("Meeting created:", data.meeting);
-          toast.success("Meeting created successfully!");
-          navigate({ to: "/meeting/$uuid", params: { uuid: roomName } });
-        },
-        onError: (error) => {
-          console.error("Error creating meeting:", error);
-          toast.error(error instanceof Error ? error.message : "Failed to create meeting");
-        },
-      }
-    );
-  }
+   const handleCreateMeeting = async () => {
+     try {
+       const meetingId = generateUUID();
+       await createMeetingMutation.mutateAsync({
+         id: meetingId,
+         name: topic,
+         description: `Meeting created by ${username}`,
+       });
+       toast.success("Meeting created successfully");
+       navigate({ to: "/meeting/$uuid", params: { uuid: meetingId } });
+      
+     } catch (error) {
+       console.error("Error creating meeting:", error);
+       toast.error(error instanceof Error ? error.message : "Failed to create meeting");
+       return null;
+     }
+   }
 
 
   return (
     <div className="min-h-screen bg-white dark:bg-zinc-950 flex items-center justify-center p-4 transition-colors duration-300">
       <div className="w-full max-w-sm space-y-12">
 
-        {/* Header */}
         <div className="space-y-2">
           <h1 className="text-3xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
             New Meeting
@@ -85,7 +62,6 @@ function RoomsPage() {
           </p>
         </div>
 
-        {/* Form */}
         <div className="space-y-8">
           <div className="space-y-6">
             <div className="space-y-2">
@@ -118,7 +94,7 @@ function RoomsPage() {
           </div>
 
           <Button
-            onClick={createRoom}
+            onClick={handleCreateMeeting}
             disabled={createMeetingMutation.isPending}
             className="w-full h-12 bg-zinc-900 dark:bg-zinc-50 text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 rounded-full transition-all duration-300 text-sm font-medium group disabled:opacity-50 disabled:cursor-not-allowed"
           >
