@@ -7,6 +7,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { AccessToken } from "livekit-server-sdk";
+import prisma from "@tuto/db";
 
 const app = new Hono();
 
@@ -82,6 +83,66 @@ app.get("/getToken", async (c) => {
 	}
 })
 
+app.post("/createMeeting", async (c) => {
+	try {
+		// Get authenticated user from session
+		const session = await auth.api.getSession({
+			headers: c.req.raw.headers,
+		});
 
+		// Check if user is authenticated
+		if (!session?.user?.id) {
+			return c.json({ error: "User not authenticated" }, 401);
+		}
+
+		const { name, description, id } = await c.req.json() as { name: string, description: string, id: string };
+
+		if (!name || !description) {
+			return c.json({ error: "Name and description are required" }, 400);
+		}
+
+		if (!id) {
+			return c.json({ error: "Meeting ID is required" }, 400);
+		}
+
+		// Create meeting with authenticated user's ID
+		const meeting = await prisma.meeting.create({
+			data: {
+				id,
+				name,
+				description,
+				userId: session.user.id, // Use authenticated user's ID from session
+			}
+		});
+
+		return c.json({ meeting }, 201);
+	} catch (error) {
+		console.error("Error creating meeting:", error);
+		return c.json({ error: "Failed to create meeting" }, 500);
+	}
+})
+
+app.get("/allRecordings", async (c) => {
+	// Get authenticated user from session
+	const session = await auth.api.getSession({
+		headers: c.req.raw.headers,
+	});
+
+	if (!session?.user?.id) {
+		return c.json({ error: "User not authenticated" }, 401);
+	}
+	try {
+		const meetings = await prisma.meeting.findMany({
+			where: {
+				userId: session.user.id,
+				hasEgress: true
+			}
+		});
+		return c.json({ meetings });
+	} catch (error) {
+		console.error("Error fetching meetings:", error);
+		return c.json({ error: "Failed to fetch meetings" }, 500);
+	}
+})
 
 export default app;

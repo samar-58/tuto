@@ -19,7 +19,7 @@ export const useToken = (roomName: string, participantName: string, enabled: boo
           throw new Error(`Failed to get token: ${res.status} ${res.statusText} - ${errorText}`);
         }
         
-        const data = await res.json(); // The response is JSON with { token: "..." }
+        const data = await res.json(); // The response is JSON with { token: "..." }    
         console.log("Token data:", data);
         return data.token;
       },

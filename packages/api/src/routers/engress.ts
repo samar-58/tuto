@@ -10,7 +10,7 @@ export const engressRouter = router({
         roomName: z.string(),
         userName: z.string(),
     })).mutation(async ({ input }) => {
-            return startEngress(input.roomName, input.userName);
+        return startEngress(input.roomName, input.userName);
     }),
     getEgressInfo: protectedProcedure.input(z.object({
         egressId: z.string(),

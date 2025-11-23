@@ -67,6 +67,7 @@ function MeetingPageComponent() {
   const {
     mutate: startRecording,
     isPending: isRecordingLoading,
+
   } = startRecordingMutation;
 
   // Use the useStopRecording hook for stopping recording
@@ -378,8 +379,8 @@ function MeetingPageComponent() {
               size="icon"
               onClick={toggleWhiteboard}
               className={`h-10 w-10 rounded-full transition-all ${showWhiteboard
-                  ? "bg-zinc-100 text-zinc-900 hover:bg-zinc-200"
-                  : "hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200"
+                ? "bg-zinc-100 text-zinc-900 hover:bg-zinc-200"
+                : "hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200"
                 }`}
               title="Whiteboard"
             >
@@ -392,8 +393,8 @@ function MeetingPageComponent() {
               onClick={() => recording ? handleStopRecording() : handleStartRecording()}
               disabled={isRecordingLoading || isStopRecordingLoading}
               className={`h-10 w-10 rounded-full transition-all ${recording
-                  ? "bg-red-500/10 text-red-500 hover:bg-red-500/20"
-                  : "hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200"
+                ? "bg-red-500/10 text-red-500 hover:bg-red-500/20"
+                : "hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200"
                 }`}
               title={recording ? "Stop Recording" : "Start Recording"}
             >

@@ -1,3 +1,4 @@
+import prisma from "@tuto/db";
 import { EgressClient, EgressInfo, EncodingOptionsPreset, SegmentedFileOutput } from "livekit-server-sdk";
 
 const API_KEY = Bun.env.LIVEKIT_API_KEY!;
@@ -13,7 +14,7 @@ export const startEngress = async (roomName: string, userName: string) => {
     if (!roomName) {
         throw new Error("Room name is required");
     }
-    
+
     const egressClient = new EgressClient(LIVEKIT_URL, API_KEY, API_SECRET);
     const outputs = {
         segments: new SegmentedFileOutput({
@@ -41,23 +42,43 @@ export const startEngress = async (roomName: string, userName: string) => {
     }
     try {
         const egressInfo = await egressClient.startParticipantEgress(roomName, userName, outputs, egressOptions);
-        return { egressId: egressInfo.egressId }
+        try {
+            await prisma.$transaction(async (tx) => {
+                await tx.meeting.update({
+                    where: {
+                        id: roomName
+                    },
+                    data: {
+                        hasEgress: true
+                    },
+                });
+                await tx.egress.create({
+                    data: {
+                        id: egressInfo.egressId,
+                        meetingId: roomName
+                    },
+                });
+            });
+        } catch (error) {
+            console.error("Failed to create db entries for egress:", error);
+            throw new Error(error instanceof Error ? error.message : "Failed to create db entries for egress");
+        }
+        return { egressId: egressInfo.egressId };
     } catch (error) {
         console.error("Failed to start egress:", error);
         throw new Error(error instanceof Error ? error.message : "Failed to start recording");
     }
-}
-
+};
 
 export const getEgressInfo = async (egressId: string): Promise<EgressInfo | undefined> => {
     const egressClient = new EgressClient(LIVEKIT_URL, API_KEY, API_SECRET);
-  
+
     try {
-      const egressInfo = await egressClient.listEgress({ egressId: egressId });
-      return egressInfo[0];
+        const egressInfo = await egressClient.listEgress({ egressId: egressId });
+        return egressInfo[0];
     } catch (error) {
-      console.error("Failed to get egress info:", error);
-      throw new Error(error instanceof Error ? error.message : "Failed to get status");
+        console.error("Failed to get egress info:", error);
+        throw new Error(error instanceof Error ? error.message : "Failed to get status");
     }
 }
 
