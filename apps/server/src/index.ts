@@ -41,45 +41,47 @@ app.get("/getToken", async (c) => {
 	console.log("Getting token");
 	console.log(c.req.query());
 	try {
-	  const roomName = c.req.query("roomName") as string;
-	  const participantName = c.req.query("participantName") as string;
-  
-	  if (!roomName || !participantName) {
-		return c.json({ error: "Missing roomName or participantName" }, 400);
-	  }
-  
-	  // Check if user is authenticated
-	//   const session = await auth.api.getSession({
-	// 	headers: fromNodeHeaders(c.header),
-	//   });
-  
-	//   if (!session?.user?.id) {
-	// 	return c.status(401);
-	// 	  error: "User not authenticated"
-	// 	});
-		
-  
-	  // Generate token only if room exists
-	  const at = new AccessToken(Bun.env.LIVEKIT_API_KEY!, Bun.env.LIVEKIT_API_SECRET!, {
-		identity: participantName,
-	  });
-  
-	  at.addGrant({
-		roomJoin: true,
-		room: roomName,
-		canPublish: true,
-		canSubscribe: true,
-	  });
-  
-	  const token = await at.toJwt();  
-  
-	  console.log("Generated Token for existing room:", roomName);
-  
-	  return c.json({ token });
+		const roomName = c.req.query("roomName") as string;
+		const participantName = c.req.query("participantName") as string;
+
+		if (!roomName || !participantName) {
+			return c.json({ error: "Missing roomName or participantName" }, 400);
+		}
+
+		// Check if user is authenticated
+		//   const session = await auth.api.getSession({
+		// 	headers: fromNodeHeaders(c.header),
+		//   });
+
+		//   if (!session?.user?.id) {
+		// 	return c.status(401);
+		// 	  error: "User not authenticated"
+		// 	});
+
+
+		// Generate token only if room exists
+		const at = new AccessToken(Bun.env.LIVEKIT_API_KEY!, Bun.env.LIVEKIT_API_SECRET!, {
+			identity: participantName,
+		});
+
+		at.addGrant({
+			roomJoin: true,
+			room: roomName,
+			canPublish: true,
+			canSubscribe: true,
+		});
+
+		const token = await at.toJwt();
+
+		console.log("Generated Token for existing room:", roomName);
+
+		return c.json({ token });
 	} catch (error) {
-	  console.error("Error generating token:", error);
-	  return c.json({ error: "Internal server error" }, 500);
+		console.error("Error generating token:", error);
+		return c.json({ error: "Internal server error" }, 500);
 	}
-  })
+})
+
+
 
 export default app;
