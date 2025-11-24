@@ -10,7 +10,6 @@ export const meetingRouter = router({
         description: z.string(),
     })).mutation(async ({ input , ctx }) => {
         const userId = ctx.session?.user?.id;
-        console.log("User ID:", userId);
 
         if(!userId) {
             throw new Error("User not authenticated");

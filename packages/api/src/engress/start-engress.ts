@@ -1,5 +1,6 @@
 import prisma from "@tuto/db";
-import { EgressClient, EgressInfo, EncodingOptionsPreset, SegmentedFileOutput } from "livekit-server-sdk";
+import { EgressClient, EncodingOptionsPreset, SegmentedFileOutput } from "livekit-server-sdk";
+import { Effect } from "effect";
 
 const API_KEY = Bun.env.LIVEKIT_API_KEY!;
 const API_SECRET = Bun.env.LIVEKIT_API_SECRET!;
@@ -10,13 +11,15 @@ const BUCKET = Bun.env.R2_BUCKET!;
 const ENDPOINT = Bun.env.R2_ENDPOINT!;
 const REGION = Bun.env.S3_REGION!;
 
-export const startEngress = async (roomName: string, userName: string) => {
-    if (!roomName) {
-        throw new Error("Room name is required");
-    }
 
-    const egressClient = new EgressClient(LIVEKIT_URL, API_KEY, API_SECRET);
-    const outputs = {
+export const startEngress = (roomName: string, userName: string) => Effect.gen(function* () {
+    if (!roomName || !userName) {
+        yield* Effect.die(new Error("Room name and user name are required"));
+    }
+    yield* Effect.log(roomName);
+    yield* Effect.log(userName);
+    const egressClient = yield* Effect.succeed(new EgressClient(LIVEKIT_URL, API_KEY, API_SECRET));
+    const outputs = yield* Effect.succeed({
         segments: new SegmentedFileOutput({
             filenamePrefix: `${roomName}`,
             playlistName: `${roomName}.m3u8`,
@@ -33,18 +36,16 @@ export const startEngress = async (roomName: string, userName: string) => {
                     forcePathStyle: false,
                 },
             },
-        }),
-    };
-    const egressOptions = {
+        })
+    });
+    const egressOptions = yield* Effect.succeed({
         layout: 'single-speaker',
         encodingOptions: EncodingOptionsPreset.H264_1080P_30,
         audioOnly: false,
-    }
-    try {
-        const egressInfo = await egressClient.startParticipantEgress(roomName, userName, outputs, egressOptions);
-        console.log("Egress Info:", egressInfo);
-        console.log("Room Name:", roomName);
-        try {
+    });
+    const egressInfo = yield* Effect.promise(() => egressClient.startParticipantEgress(roomName, userName, outputs, egressOptions));
+    yield* Effect.tryPromise({
+        try: async (): Promise<void> => {
             await prisma.$transaction(async (tx) => {
                 await tx.meeting.update({
                     where: {
@@ -61,25 +62,26 @@ export const startEngress = async (roomName: string, userName: string) => {
                     },
                 });
             });
-        } catch (error) {
-            console.error("Failed to create db entries for egress:", error);
-            throw new Error(error instanceof Error ? error.message : "Failed to create db entries for egress");
+        },
+        catch: (error) => {
+            return Effect.log(error);
         }
-        return { egressId: egressInfo.egressId };
-    } catch (error) {
-        console.error("Failed to start egress:", error);
-        throw new Error(error instanceof Error ? error.message : "Failed to start recording");
-    }
-};
+    })
+    yield* Effect.log(egressInfo);
+    yield* Effect.log(egressInfo.egressId);
+    return { egressId: egressInfo.egressId };
+});
 
-export const getEgressInfo = async (egressId: string): Promise<EgressInfo | undefined> => {
-    const egressClient = new EgressClient(LIVEKIT_URL, API_KEY, API_SECRET);
 
-    try {
-        const egressInfo = await egressClient.listEgress({ egressId: egressId });
-        return egressInfo[0];
-    } catch (error) {
-        console.error("Failed to get egress info:", error);
-        throw new Error(error instanceof Error ? error.message : "Failed to get status");
+export const getEgressInfo = (egressId: string) => Effect.gen(function* () {
+    if (!egressId) {
+        yield* Effect.die(new Error("Egress ID is required"));
     }
-}
+    const egressClient = yield* Effect.succeed(new EgressClient(LIVEKIT_URL, API_KEY, API_SECRET));
+    const egressInfo = yield* Effect.promise(() => egressClient.listEgress({ egressId: egressId }));
+    if (!egressInfo) {
+        yield* Effect.die(new Error("Egress info not found"));
+    }
+    yield* Effect.log(egressInfo[0]);
+});
+

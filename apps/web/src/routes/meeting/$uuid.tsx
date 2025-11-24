@@ -145,7 +145,8 @@ function MeetingPageComponent() {
       {
         onSuccess: (data) => {
           console.log("Recording started successfully:", data);
-          setEgressId(data.egressId);
+          const result = data as { egressId: string };
+          setEgressId(result.egressId);
           setRecording(true);
           setShowRecordingPrompt(false);
           setStatus("Recording started successfully!");
@@ -154,24 +155,31 @@ function MeetingPageComponent() {
           console.error("Failed to start recording:", error);
           setStatus(`Failed to start recording: ${error.message}`);
           setShowRecordingPrompt(false);
+          // Ensure recording state is false if it failed to start
+          setRecording(false);
+          setEgressId(null);
         },
       }
     );
   }
 
   function handleStopRecording() {
+    console.log("handleStopRecording called, egressId:", egressId);
     if (egressId) {
+      console.log("Attempting to stop recording with egressId:", egressId);
       stopRecording(
         { egressId },
         {
-          onSuccess: () => {
-            console.log("Recording stopped successfully");
+          onSuccess: (data) => {
+            console.log("Recording stopped successfully, response:", data);
             setRecording(false);
             setEgressId(null);
             setStatus("Recording stopped successfully!");
           },
           onError: (error) => {
             console.error("Failed to stop recording:", error);
+            console.error("Error details:", JSON.stringify(error, null, 2));
+            console.log("Error details:", error);
             setStatus(`Failed to stop recording: ${error.message}`);
           },
         }
@@ -390,7 +398,9 @@ function MeetingPageComponent() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => recording ? handleStopRecording() : handleStartRecording()}
+              onClick={() => {
+                handleStopRecording();
+              }}
               disabled={isRecordingLoading || isStopRecordingLoading}
               className={`h-10 w-10 rounded-full transition-all ${recording
                 ? "bg-red-500/10 text-red-500 hover:bg-red-500/20"
