@@ -2,6 +2,7 @@ import { protectedProcedure, publicProcedure, router } from "../index";
 import { engressRouter } from "./engress";
 import { getTokenRouter } from "./get-token";
 import { meetingRouter } from "./meeting";
+import { videoToMp3Router } from "./video-to-mp3";
 
 export const appRouter = router({
 	healthCheck: publicProcedure.query(() => {
@@ -16,6 +17,7 @@ export const appRouter = router({
 	engress: engressRouter,
 	getToken: getTokenRouter,	
 	meeting: meetingRouter,
+	videoToMp3: videoToMp3Router,
 });
 
 

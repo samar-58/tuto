@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import Hls from 'hls.js';
-import { Download, Loader2 } from 'lucide-react';
+import { Download, Loader2, Music } from 'lucide-react';
+import { useTRPC } from '@/utils/trpc';
+import { useMutation } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 interface RecordingPlayerProps {
     playlistUrl: string;
@@ -18,7 +21,11 @@ export function RecordingPlayer({
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isDownloading, setIsDownloading] = useState(false);
-
+    const [isExtractingAudio, setIsExtractingAudio] = useState(false);
+    
+    const trpc = useTRPC();
+    const extractAudioMutation = useMutation(trpc.videoToMp3.videoToMp3.mutationOptions());
+    const startTranscriptionMutation = useMutation(trpc.videoToMp3.startTranscription.mutationOptions());
     useEffect(() => {
         const video = videoRef.current;
         if (!video) return;
@@ -42,7 +49,7 @@ export function RecordingPlayer({
                 setIsLoading(false);
             });
 
-            hls.on(Hls.Events.ERROR, (event, data) => {
+            hls.on(Hls.Events.ERROR, (_event, data) => {
                 if (data.fatal) {
                     setError('Failed to load video');
                     setIsLoading(false);
@@ -106,6 +113,27 @@ export function RecordingPlayer({
         }
     };
 
+    const handleExtractAudio = async () => {
+        setIsExtractingAudio(true);
+        try {
+            const result = await extractAudioMutation.mutateAsync({
+                videoUrl: playlistUrl,
+            });
+            toast.success('Audio extraction started! The MP3 file will be available shortly.');
+            const transcriptionResult = await startTranscriptionMutation.mutateAsync({
+                key: result.key,
+            });
+            console.log('Transcription result:', transcriptionResult);
+            toast.success('Transcription started! The transcription will be available shortly.');
+        } catch (err) {
+            console.error('Audio extraction failed:', err);
+            toast.error('Failed to extract audio. Please try again.');
+            setError('Failed to extract audio');
+        } finally {
+            setIsExtractingAudio(false);
+        }
+    };
+
     return (
         <div className={`relative ${className}`}>
             {isLoading && (
@@ -142,6 +170,23 @@ export function RecordingPlayer({
                         <>
                             <Download className="w-4 h-4" />
                             Download Recording
+                        </>
+                    )}
+                </button>
+                <button
+                    onClick={handleExtractAudio}
+                    disabled={isExtractingAudio || !!error}
+                    className="flex items-center gap-2 px-4 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                    {isExtractingAudio ? (
+                        <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            Extracting and transcribing...
+                        </>
+                    ) : (
+                        <>
+                            <Music className="w-4 h-4" />
+                            Extract Audio (MP3) and Transcribe
                         </>
                     )}
                 </button>
