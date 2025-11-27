@@ -4,6 +4,7 @@ import { Download, Loader2, Music } from 'lucide-react';
 import { useTRPC } from '@/utils/trpc';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import SummarizeRoute from './summarize';
 
 interface RecordingPlayerProps {
     playlistUrl: string;
@@ -22,7 +23,7 @@ export function RecordingPlayer({
     const [error, setError] = useState<string | null>(null);
     const [isDownloading, setIsDownloading] = useState(false);
     const [isExtractingAudio, setIsExtractingAudio] = useState(false);
-    
+    const [input, setInput] = useState('');
     const trpc = useTRPC();
     const extractAudioMutation = useMutation(trpc.videoToMp3.videoToMp3.mutationOptions());
     const startTranscriptionMutation = useMutation(trpc.videoToMp3.startTranscription.mutationOptions());
@@ -124,6 +125,7 @@ export function RecordingPlayer({
                 key: result.key,
             });
             console.log('Transcription result:', transcriptionResult);
+            setInput(transcriptionResult.transcription);
             toast.success('Transcription started! The transcription will be available shortly.');
         } catch (err) {
             console.error('Audio extraction failed:', err);
@@ -191,6 +193,7 @@ export function RecordingPlayer({
                     )}
                 </button>
             </div>
+            <SummarizeRoute input={input} setInput={setInput} />
         </div>
     );
 }

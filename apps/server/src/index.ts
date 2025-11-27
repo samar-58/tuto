@@ -7,6 +7,10 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { AccessToken } from "livekit-server-sdk";
+import { convertToModelMessages, streamText, type UIMessage } from "ai";
+import { openai } from "@ai-sdk/openai";
+import { serve } from '@hono/node-server';
+
 
 const app = new Hono();
 
@@ -70,7 +74,7 @@ app.get("/getToken", async (c) => {
 
 		const token = await at.toJwt()
 		console.log(token)
-       
+
 		return c.json({ token });
 	} catch (error) {
 		console.error("Error generating token:", error);
@@ -78,5 +82,20 @@ app.get("/getToken", async (c) => {
 	}
 })
 
+app.post("/summarize", async (c) => {
+	const { messages } : { messages: UIMessage[] } = await c.req.json();
+    const result = streamText({
+		model: openai("gpt-5-nano"),
+		messages: convertToModelMessages(messages),
+		system : "You are a helpful assistant that summarizes the user's message.",
+	});
+	return result.toUIMessageStreamResponse({
+		headers: {
+		  'Content-Encoding': 'none',
+		},
+	});
+})
 
-export default app;
+
+
+export default serve({ fetch: app.fetch, port: 3000 });
