@@ -11,6 +11,6 @@ export async function transcribeAudio(audioUrl: string) {
         audio: new URL(audioUrl),
     });
     const text = transcript.text;
-    console.log(text);
+    //console.log(text);
     return text;
 }
