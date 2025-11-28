@@ -62,6 +62,7 @@ export const getRouter = () => {
 					{children}
 				</TRPCProvider>
 			</QueryClientProvider>
+	
 		),
 	});
 	return router;

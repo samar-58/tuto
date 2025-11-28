@@ -17,7 +17,7 @@ interface Recording {
 
 const r2Url = import.meta.env.VITE_R2_URL;
 
-export const Route = createFileRoute('/recordings-demo')({
+export const Route = createFileRoute('/recordings')({
     component: RecordingsDemoPage,
 });
 

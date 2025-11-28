@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
+import { ModeToggle } from "@/components/mode-toggle";
 
 export const Route = createFileRoute("/")({
 	component: HomeComponent,
@@ -23,6 +24,7 @@ function HomeComponent() {
 						>
 							Get Started
 						</Link>
+						<ModeToggle />
 					</div>
 				</div>
 			</header>
