@@ -1,12 +1,22 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import { ModeToggle } from "@/components/mode-toggle";
+import { authClient } from "@/lib/auth-client";
+import { useEffect } from "react";
 
 export const Route = createFileRoute("/")({
 	component: HomeComponent,
 });
 
 function HomeComponent() {
+	const navigate = useNavigate()
+	const { data: session } = authClient.useSession()
+
+	useEffect(() => {
+		if (session?.user.name) {
+			navigate({ to: "/dashboard" })
+		}
+	}, [session?.user.name])
 	return (
 		<div className="min-h-screen flex flex-col font-sans">
 			<header className="absolute top-6 left-0 w-full z-50 animate-fade-in">
