@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as RecordingsRouteImport } from './routes/recordings'
 import { Route as MeetingsRouteImport } from './routes/meetings'
 import { Route as LoginRouteImport } from './routes/login'
@@ -16,6 +17,11 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MeetingUuidRouteImport } from './routes/meeting/$uuid'
 
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RecordingsRoute = RecordingsRouteImport.update({
   id: '/recordings',
   path: '/recordings',
@@ -53,6 +59,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/meetings': typeof MeetingsRoute
   '/recordings': typeof RecordingsRoute
+  '/settings': typeof SettingsRoute
   '/meeting/$uuid': typeof MeetingUuidRoute
 }
 export interface FileRoutesByTo {
@@ -61,6 +68,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/meetings': typeof MeetingsRoute
   '/recordings': typeof RecordingsRoute
+  '/settings': typeof SettingsRoute
   '/meeting/$uuid': typeof MeetingUuidRoute
 }
 export interface FileRoutesById {
@@ -70,6 +78,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/meetings': typeof MeetingsRoute
   '/recordings': typeof RecordingsRoute
+  '/settings': typeof SettingsRoute
   '/meeting/$uuid': typeof MeetingUuidRoute
 }
 export interface FileRouteTypes {
@@ -80,6 +89,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/meetings'
     | '/recordings'
+    | '/settings'
     | '/meeting/$uuid'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -88,6 +98,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/meetings'
     | '/recordings'
+    | '/settings'
     | '/meeting/$uuid'
   id:
     | '__root__'
@@ -96,6 +107,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/meetings'
     | '/recordings'
+    | '/settings'
     | '/meeting/$uuid'
   fileRoutesById: FileRoutesById
 }
@@ -105,11 +117,19 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   MeetingsRoute: typeof MeetingsRoute
   RecordingsRoute: typeof RecordingsRoute
+  SettingsRoute: typeof SettingsRoute
   MeetingUuidRoute: typeof MeetingUuidRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/recordings': {
       id: '/recordings'
       path: '/recordings'
@@ -161,6 +181,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   MeetingsRoute: MeetingsRoute,
   RecordingsRoute: RecordingsRoute,
+  SettingsRoute: SettingsRoute,
   MeetingUuidRoute: MeetingUuidRoute,
 }
 export const routeTree = rootRouteImport
