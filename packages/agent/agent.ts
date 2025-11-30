@@ -26,7 +26,7 @@ export default defineAgent({
                 console.log("Using Deepgram STT");
                 return new deepgram.STT({
                     model: "nova-3",
-                    language: "hi-Latn",
+                    language: "hi",
                 });
             } else {
                 console.log("Using OpenAI Whisper STT");
