@@ -9,7 +9,7 @@ import {
 } from "@livekit/components-react";
 import '@livekit/components-styles';
 import MyVideoConference from "@/components/video-conference";
-import { useToken, useRecord, useStopRecording } from "@/hooks/live-kit";
+import { useToken, useRecord, useStopRecording, useEnableAgent, useDisableAgent, useAgentStatus } from "@/hooks/live-kit";
 import { authClient } from "@/lib/auth-client";
 import {
   PhoneOff,
@@ -17,9 +17,14 @@ import {
   PenTool,
   ChevronLeft,
   Loader2,
-  Layout
+  Layout,
+  Share2,
+  Check,
+  Bot,
+  BotOff
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 interface Message {
   from: string;
@@ -42,6 +47,8 @@ function MeetingPageComponent() {
   const [recording, setRecording] = useState(false);
   const [egressId, setEgressId] = useState<string | null>(null);
   const [showRecordingPrompt, setShowRecordingPrompt] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
+  const [agentEnabled, setAgentEnabled] = useState(false);
   const { data: session } = authClient.useSession()
 
   const [roomInstance] = useState(() => new Room({
@@ -59,6 +66,7 @@ function MeetingPageComponent() {
   const { data: token, isLoading: isTokenLoading, error: tokenError } = useToken(
     uuid,
     username,
+    'tutor', // Pass role as 'tutor'
     !!username
   );
 
@@ -76,6 +84,11 @@ function MeetingPageComponent() {
     mutate: stopRecording,
     isPending: isStopRecordingLoading,
   } = stopRecordingMutation;
+
+  // Agent hooks
+  const enableAgentMutation = useEnableAgent();
+  const disableAgentMutation = useDisableAgent();
+  const { data: agentStatus } = useAgentStatus(uuid, roomInstance.state === "connected");
 
   // Helper to validate UUID format
   const isValidUUID = (uuid: string) => {
@@ -239,6 +252,66 @@ function MeetingPageComponent() {
     setShowWhiteboard(!showWhiteboard);
   };
 
+  const handleShareLink = async () => {
+    const meetingUrl = `${window.location.origin}/meeting/${uuid}`;
+
+    try {
+      await navigator.clipboard.writeText(meetingUrl);
+      setLinkCopied(true);
+      toast.success("Meeting link copied to clipboard!", {
+        description: "Share this link with your students to invite them to the class."
+      });
+
+      // Reset the copied state after 2 seconds
+      setTimeout(() => {
+        setLinkCopied(false);
+      }, 2000);
+    } catch (error) {
+      console.error("Failed to copy link:", error);
+      toast.error("Failed to copy link", {
+        description: "Please try again or copy the URL manually."
+      });
+    }
+  };
+
+  const handleToggleAgent = async () => {
+    if (agentEnabled || agentStatus?.active) {
+      // Disable agent
+      disableAgentMutation.mutate(
+        { roomName: uuid },
+        {
+          onSuccess: () => {
+            setAgentEnabled(false);
+            toast.success("AI Assistant disabled");
+          },
+          onError: (error) => {
+            toast.error("Failed to disable AI Assistant", {
+              description: error.message,
+            });
+          },
+        }
+      );
+    } else {
+      // Enable agent
+      enableAgentMutation.mutate(
+        { roomName: uuid },
+        {
+          onSuccess: () => {
+            setAgentEnabled(true);
+            toast.success("AI Assistant enabled", {
+              description: "The assistant is now listening and ready to answer questions.",
+            });
+          },
+          onError: (error) => {
+            toast.error("Failed to enable AI Assistant", {
+              description: error.message,
+            });
+          },
+        }
+      );
+    }
+  };
+
   // Recording prompt modal
   if (showRecordingPrompt) {
     return (
@@ -332,6 +405,12 @@ function MeetingPageComponent() {
                 <span className="text-xs font-medium text-red-500 tracking-wide">Recording</span>
               </div>
             )}
+            {(agentEnabled || agentStatus?.active) && (
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20">
+                <Bot className="w-3 h-3 text-blue-500" />
+                <span className="text-xs font-medium text-blue-500 tracking-wide">AI Assistant Active</span>
+              </div>
+            )}
           </div>
         </header>
 
@@ -393,6 +472,23 @@ function MeetingPageComponent() {
             <Button
               variant="ghost"
               size="icon"
+              onClick={handleShareLink}
+              className={`h-10 w-10 rounded-full transition-all duration-300 ${linkCopied
+                ? "bg-green-500/10 text-green-500 hover:bg-green-500/20"
+                : "hover:bg-accent text-muted-foreground hover:text-foreground"
+                }`}
+              title="Share Meeting Link"
+            >
+              {linkCopied ? (
+                <Check className="w-4 h-4 animate-in zoom-in duration-200" />
+              ) : (
+                <Share2 className="w-4 h-4" />
+              )}
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => {
                 handleStopRecording();
               }}
@@ -407,6 +503,26 @@ function MeetingPageComponent() {
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <Disc className="w-4 h-4" />
+              )}
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleToggleAgent}
+              disabled={enableAgentMutation.isPending || disableAgentMutation.isPending}
+              className={`h-10 w-10 rounded-full transition-all ${(agentEnabled || agentStatus?.active)
+                ? "bg-blue-500/10 text-blue-500 hover:bg-blue-500/20"
+                : "hover:bg-accent text-muted-foreground hover:text-foreground"
+                }`}
+              title={(agentEnabled || agentStatus?.active) ? "Disable AI Assistant" : "Enable AI Assistant"}
+            >
+              {enableAgentMutation.isPending || disableAgentMutation.isPending ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (agentEnabled || agentStatus?.active) ? (
+                <Bot className="w-4 h-4" />
+              ) : (
+                <BotOff className="w-4 h-4" />
               )}
             </Button>
 

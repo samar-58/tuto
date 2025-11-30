@@ -45,24 +45,16 @@ app.get("/getToken", async (c) => {
 	try {
 		const roomName = c.req.query("roomName") as string;
 		const participantName = c.req.query("participantName") as string;
+		const role = (c.req.query("role") as 'tutor' | 'student') || 'tutor';
 
 		if (!roomName || !participantName) {
 			return c.json({ error: "Missing roomName or participantName" }, 400);
 		}
 
-		// const session = await auth.api.getSession({
-		// 	headers: c.req.raw.headers,
-		// });
-
-		// // Check if user is authenticated
-		// if (!session?.user?.id) {
-		// 	return c.json({ error: "User not authenticated" }, 401);
-		// }
-
-
-		// Generate token only if room exists
+		// Generate token with role metadata
 		const at = new AccessToken(Bun.env.LIVEKIT_API_KEY!, Bun.env.LIVEKIT_API_SECRET!, {
 			identity: participantName,
+			metadata: JSON.stringify({ role }),
 		});
 
 		at.addGrant({
@@ -73,7 +65,7 @@ app.get("/getToken", async (c) => {
 		});
 
 		const token = await at.toJwt()
-		console.log(token)
+		console.log(`Generated token for ${participantName} as ${role}`)
 
 		return c.json({ token });
 	} catch (error) {
@@ -83,15 +75,15 @@ app.get("/getToken", async (c) => {
 })
 
 app.post("/summarize", async (c) => {
-	const { messages } : { messages: UIMessage[] } = await c.req.json();
-    const result = streamText({
+	const { messages }: { messages: UIMessage[] } = await c.req.json();
+	const result = streamText({
 		model: openai("gpt-5-nano"),
 		messages: convertToModelMessages(messages),
-		system : "You are a helpful assistant that summarizes the user's message.",
+		system: "You are a helpful assistant that summarizes the user's message.",
 	});
 	return result.toUIMessageStreamResponse({
 		headers: {
-		  'Content-Encoding': 'none',
+			'Content-Encoding': 'none',
 		},
 	});
 })

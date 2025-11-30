@@ -9,9 +9,11 @@ const API_SECRET = Bun.env.LIVEKIT_API_SECRET;
 export const generateToken = async ({
   roomName,
   userName,
+  role = 'student',
 }: {
   roomName: string;
   userName: string;
+  role?: 'tutor' | 'student';
 }) => {
   if (!roomName || !userName) {
     throw new Error("Room name and user name are required");
@@ -20,6 +22,7 @@ export const generateToken = async ({
   const at = new AccessToken(API_KEY, API_SECRET, {
     identity: userName,
     name: userName,
+    metadata: JSON.stringify({ role }),
   });
 
   at.addGrant({
@@ -39,11 +42,12 @@ export const getTokenRouter = router({
       z.object({
         roomName: z.string(),
         participantName: z.string(),
+        role: z.enum(['tutor', 'student']).optional(),
       })
     )
     .query(async ({ input }) => {
-      const { roomName, participantName } = input;
-      return generateToken({ roomName, userName: participantName });
+      const { roomName, participantName, role } = input;
+      return generateToken({ roomName, userName: participantName, role });
     }),
 });
 

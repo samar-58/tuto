@@ -7,6 +7,7 @@ export const Route = createFileRoute("/")({
 });
 
 function HomeComponent() {
+
 	return (
 		<div className="min-h-screen flex flex-col font-sans">
 			<header className="absolute top-6 left-0 w-full z-50 animate-fade-in">
