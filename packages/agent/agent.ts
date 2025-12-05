@@ -36,11 +36,54 @@ export default defineAgent({
             }
         };
 
+        // Helper function to publish transcription to all participants via data channel
+        const publishTranscription = async (
+            text: string,
+            type: 'FINAL' | 'PARTIAL',
+            speaker: string
+        ) => {
+            if (!text.trim()) return;
+
+            const data = JSON.stringify({
+                text,
+                type,
+                speaker,
+                timestamp: Date.now()
+            });
+
+            try {
+                const localParticipant = ctx.room.localParticipant;
+                if (!localParticipant) return;
+
+                await localParticipant.publishData(
+                    new TextEncoder().encode(data),
+                    {
+                        reliable: type === 'FINAL',
+                        topic: 'transcription'
+                    }
+                );
+            } catch (error) {
+                // Silently ignore publish errors
+            }
+        };
+
 
         const isTutor = (participant: any): boolean => {
-            const isMatch = participant.identity === TUTOR_PARTICIPANT_IDENTITY ||
-                participant.name?.toLowerCase().includes('tutor');
-            return isMatch;
+            try {
+                // Check if participant metadata contains role: 'tutor'
+                if (participant.metadata) {
+                    const metadata = JSON.parse(participant.metadata);
+                    return metadata.role === 'tutor';
+                }
+                // Fallback to identity check
+                return participant.identity === TUTOR_PARTICIPANT_IDENTITY ||
+                    participant.name?.toLowerCase().includes('tutor');
+            } catch (error) {
+                console.error('Error parsing participant metadata:', error);
+                // Fallback to identity check
+                return participant.identity === TUTOR_PARTICIPANT_IDENTITY ||
+                    participant.name?.toLowerCase().includes('tutor');
+            }
         };
 
 
@@ -74,9 +117,11 @@ export default defineAgent({
                             if (event.type === 2) {
                                 const text = event.alternatives?.[0]?.text || '';
                                 console.log(`[${participant.identity}] FINAL: ${text}`);
+                                await publishTranscription(text, 'FINAL', participant.identity);
                             } else if (event.type === 1) {
                                 const text = event.alternatives?.[0]?.text || '';
                                 console.log(`[${participant.identity}] PARTIAL: ${text}`);
+                                await publishTranscription(text, 'PARTIAL', participant.identity);
                             }
                         }
                     } catch (error) {
@@ -149,9 +194,11 @@ export default defineAgent({
                                         if (event.type === 2) {
                                             const text = event.alternatives?.[0]?.text || '';
                                             console.log(`[${participant.identity}] FINAL: ${text}`);
+                                            await publishTranscription(text, 'FINAL', participant.identity);
                                         } else if (event.type === 1) {
                                             const text = event.alternatives?.[0]?.text || '';
                                             console.log(`[${participant.identity}] PARTIAL: ${text}`);
+                                            await publishTranscription(text, 'PARTIAL', participant.identity);
                                         }
                                     }
                                 } catch (error) {

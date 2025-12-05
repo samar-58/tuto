@@ -34,7 +34,14 @@ export default function MyVideoConference({ handleSend, message, setMessage, mes
   )
 
 
-  const [transcripts, setTranscripts] = useState<string[]>([])
+  interface Transcript {
+    text: string
+    speaker: string
+    type: 'FINAL' | 'PARTIAL'
+    timestamp: number
+  }
+
+  const [transcripts, setTranscripts] = useState<Transcript[]>([])
 
   const onDataReceived = React.useCallback((msg: any) => {
     try {
@@ -42,18 +49,45 @@ export default function MyVideoConference({ handleSend, message, setMessage, mes
         const decodedText = new TextDecoder("utf-8").decode(msg.payload)
         try {
           const parsed = JSON.parse(decodedText)
-          const text = typeof parsed === "string" ? parsed : (parsed?.text ?? decodedText)
-          setTranscripts((prev) => [...prev, String(text)])
+          if (parsed?.text) {
+            setTranscripts((prev) => {
+              // For PARTIAL transcripts, replace the last one from same speaker
+              if (parsed.type === 'PARTIAL' && prev.length > 0) {
+                const lastTranscript = prev[prev.length - 1]
+                if (lastTranscript.speaker === parsed.speaker && lastTranscript.type === 'PARTIAL') {
+                  return [...prev.slice(0, -1), {
+                    text: parsed.text,
+                    speaker: parsed.speaker || 'Unknown',
+                    type: parsed.type || 'FINAL',
+                    timestamp: parsed.timestamp || Date.now()
+                  }]
+                }
+              }
+              // Keep only last 20 transcripts to avoid memory issues
+              const newTranscripts = [...prev, {
+                text: parsed.text,
+                speaker: parsed.speaker || 'Unknown',
+                type: parsed.type || 'FINAL',
+                timestamp: parsed.timestamp || Date.now()
+              }]
+              return newTranscripts.slice(-20)
+            })
+          }
         } catch {
-          setTranscripts((prev) => [...prev, decodedText])
+          setTranscripts((prev) => [...prev.slice(-19), {
+            text: decodedText,
+            speaker: 'Unknown',
+            type: 'FINAL',
+            timestamp: Date.now()
+          }])
         }
       }
     } catch {
-      console.error("Malformed data channel message")
+      // Silently ignore malformed messages
     }
   }, [])
 
-  useDataChannel(onDataReceived)
+  useDataChannel("transcription", onDataReceived)
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
@@ -93,15 +127,24 @@ export default function MyVideoConference({ handleSend, message, setMessage, mes
 
 
         {transcripts.length > 0 && (
-          <div className="border-b border-border p-3 bg-muted/50 overflow-y-auto max-h-40">
-            <div className="text-xs text-muted-foreground font-medium mb-2">Transcripts</div>
-            <ul className="space-y-1">
-              {transcripts.map((t, i) => (
-                <li key={i} className="text-foreground text-xs lg:text-sm break-words">
-                  {t}
-                </li>
+          <div className="border-b border-border p-3 bg-gradient-to-b from-muted/30 to-transparent">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></div>
+              <span className="text-xs text-muted-foreground font-medium">Live Subtitles</span>
+            </div>
+            <div className="space-y-1.5 max-h-32 overflow-y-auto">
+              {transcripts.slice(-5).map((t, i) => (
+                <div
+                  key={i}
+                  className={`text-sm leading-relaxed ${t.type === 'PARTIAL'
+                      ? 'text-muted-foreground/70 italic'
+                      : 'text-foreground'
+                    } ${i === transcripts.slice(-5).length - 1 ? 'font-medium' : 'opacity-60'}`}
+                >
+                  {t.text}
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
         )}
 
