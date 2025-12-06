@@ -10,12 +10,14 @@ interface RecordingPlayerProps {
     playlistUrl: string;
     recordingId?: string;
     className?: string;
+    meetingId: string;
 }
 
 export function RecordingPlayer({
     playlistUrl,
     recordingId,
-    className = ''
+    className = '',
+    meetingId
 }: RecordingPlayerProps) {
     const videoRef = useRef<HTMLVideoElement>(null);
     const hlsRef = useRef<Hls | null>(null);
@@ -193,7 +195,7 @@ export function RecordingPlayer({
                     )}
                 </button>
             </div>
-            <SummarizeRoute input={input} setInput={setInput} />
+            <SummarizeRoute input={input} setInput={setInput} meetingId={meetingId} />
         </div>
     );
 }

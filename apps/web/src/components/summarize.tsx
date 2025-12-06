@@ -42,7 +42,7 @@ import {
   import { DefaultChatTransport } from 'ai';
 
   
-export default function SummarizeRoute({ input , setInput }: { input: string, setInput: (input: string) => void }) {
+export default function SummarizeRoute({ input , setInput , meetingId }: { input: string, setInput: (input: string) => void, meetingId: string }) {
     const { messages, sendMessage, status, regenerate } = useChat({
       transport: new DefaultChatTransport({
         api: `${import.meta.env.VITE_SERVER_URL}/summarize`,
@@ -57,7 +57,11 @@ export default function SummarizeRoute({ input , setInput }: { input: string, se
       sendMessage(
         { 
           text: message.text || 'Sent with attachments',
-          files: message.files 
+          files: message.files,
+        } , {
+          body : {
+            meetingId: meetingId
+          }
         }
       );
       setInput('');
