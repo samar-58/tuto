@@ -78,6 +78,8 @@ app.get("/getToken", async (c) => {
 
 app.post("/summarize", async (c) => {
 	const { messages, meetingId }: { messages: UIMessage[]; meetingId: string } = await c.req.json();
+
+	
 	return createUIMessageStreamResponse({
 		stream: createUIMessageStream({
 		  execute: ({ writer: dataStream }) => {

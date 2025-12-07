@@ -15,6 +15,7 @@ import { Route as MeetingsRouteImport } from './routes/meetings'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as RecordingIdRouteImport } from './routes/recording/$id'
 import { Route as MeetingUuidRouteImport } from './routes/meeting/$uuid'
 
 const SettingsRoute = SettingsRouteImport.update({
@@ -47,6 +48,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RecordingIdRoute = RecordingIdRouteImport.update({
+  id: '/recording/$id',
+  path: '/recording/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MeetingUuidRoute = MeetingUuidRouteImport.update({
   id: '/meeting/$uuid',
   path: '/meeting/$uuid',
@@ -61,6 +67,7 @@ export interface FileRoutesByFullPath {
   '/recordings': typeof RecordingsRoute
   '/settings': typeof SettingsRoute
   '/meeting/$uuid': typeof MeetingUuidRoute
+  '/recording/$id': typeof RecordingIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -70,6 +77,7 @@ export interface FileRoutesByTo {
   '/recordings': typeof RecordingsRoute
   '/settings': typeof SettingsRoute
   '/meeting/$uuid': typeof MeetingUuidRoute
+  '/recording/$id': typeof RecordingIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -80,6 +88,7 @@ export interface FileRoutesById {
   '/recordings': typeof RecordingsRoute
   '/settings': typeof SettingsRoute
   '/meeting/$uuid': typeof MeetingUuidRoute
+  '/recording/$id': typeof RecordingIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -91,6 +100,7 @@ export interface FileRouteTypes {
     | '/recordings'
     | '/settings'
     | '/meeting/$uuid'
+    | '/recording/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -100,6 +110,7 @@ export interface FileRouteTypes {
     | '/recordings'
     | '/settings'
     | '/meeting/$uuid'
+    | '/recording/$id'
   id:
     | '__root__'
     | '/'
@@ -109,6 +120,7 @@ export interface FileRouteTypes {
     | '/recordings'
     | '/settings'
     | '/meeting/$uuid'
+    | '/recording/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -119,6 +131,7 @@ export interface RootRouteChildren {
   RecordingsRoute: typeof RecordingsRoute
   SettingsRoute: typeof SettingsRoute
   MeetingUuidRoute: typeof MeetingUuidRoute
+  RecordingIdRoute: typeof RecordingIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -165,6 +178,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/recording/$id': {
+      id: '/recording/$id'
+      path: '/recording/$id'
+      fullPath: '/recording/$id'
+      preLoaderRoute: typeof RecordingIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/meeting/$uuid': {
       id: '/meeting/$uuid'
       path: '/meeting/$uuid'
@@ -183,6 +203,7 @@ const rootRouteChildren: RootRouteChildren = {
   RecordingsRoute: RecordingsRoute,
   SettingsRoute: SettingsRoute,
   MeetingUuidRoute: MeetingUuidRoute,
+  RecordingIdRoute: RecordingIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

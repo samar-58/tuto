@@ -7,9 +7,8 @@ import { toast } from "sonner"
 import { useTRPC } from "@/utils/trpc"
 import { useMutation } from "@tanstack/react-query"
 import { authClient } from "@/lib/auth-client"
-import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
-import { Separator } from "@/components/ui/separator"
 
 export const Route = createFileRoute("/meetings")({
   component: RoomsPage,

@@ -15,10 +15,17 @@ import type { QueryClient } from "@tanstack/react-query";
 import type { TRPCOptionsProxy } from "@trpc/tanstack-react-query";
 import type { AppRouter } from "@tuto/api/routers/index";
 import { ThemeProvider } from "@/components/theme-provider";
+
+if (import.meta.env.DEV) {
+	import("react-grab");
+}
+
 export interface RouterAppContext {
 	trpc: TRPCOptionsProxy<AppRouter>;
 	queryClient: QueryClient;
 }
+
+
 
 export const Route = createRootRouteWithContext<RouterAppContext>()({
 	head: () => ({
@@ -50,6 +57,11 @@ function RootDocument() {
 		<html lang="en" className="dark">
 			<head>
 				<HeadContent />
+				{import.meta.env.DEV && (
+					<script type="module">
+						{`import("react-grab");`}
+					</script>
+				)}
 			</head>
 			<body>
 				<ThemeProvider> 

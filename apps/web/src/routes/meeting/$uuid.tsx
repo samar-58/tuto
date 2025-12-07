@@ -387,36 +387,7 @@ function MeetingPageComponent() {
     <div className="h-screen w-full bg-background flex flex-col overflow-hidden">
       <RoomContext.Provider value={roomInstance}>
 
-        {/* Top Bar */}
-        <header className="h-16 px-6 flex items-center justify-between z-10 shrink-0 border-b border-border/40 bg-background/95 backdrop-blur">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]"></div>
-              <span className="text-sm font-medium text-foreground">
-                {username}
-              </span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {recording && (
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/20">
-                <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-                <span className="text-xs font-medium text-red-500 tracking-wide">Recording</span>
-              </div>
-            )}
-            {(agentEnabled || agentStatus?.active) && (
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20">
-                <Bot className="w-3 h-3 text-blue-500" />
-                <span className="text-xs font-medium text-blue-500 tracking-wide">AI Assistant Active</span>
-              </div>
-            )}
-          </div>
-        </header>
-
-        {/* Main Content Area */}
         <main className="flex-1 flex relative overflow-hidden px-6 pb-24 gap-4">
-          {/* Video Conference Area */}
           <div className={`flex-1 h-full transition-all duration-500 rounded-xl overflow-hidden border border-border bg-card ${showWhiteboard ? 'w-1/2' : 'w-full'}`}>
             <MyVideoConference
               handleSend={handleSend}
@@ -427,7 +398,6 @@ function MeetingPageComponent() {
             />
           </div>
 
-          {/* Whiteboard Area */}
           {showWhiteboard && (
             <div className="w-1/2 h-full rounded-xl overflow-hidden border border-border bg-card animate-in slide-in-from-right-10 duration-500">
               <div className="flex items-center justify-center h-full">
@@ -439,8 +409,7 @@ function MeetingPageComponent() {
             </div>
           )}
         </main>
-
-        {/* Unified Bottom Control Bar */}
+            
         <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50">
           <div className="flex items-center gap-1 p-1.5 bg-card/95 backdrop-blur-md border border-border rounded-full shadow-lg">
 

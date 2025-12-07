@@ -9,6 +9,11 @@ import {
   useDataChannel,
 } from "@livekit/components-react"
 import { Track } from "livekit-client"
+import { Card } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 interface Message {
   from: string
@@ -32,7 +37,6 @@ export default function MyVideoConference({ handleSend, message, setMessage, mes
     ],
     { onlySubscribed: false },
   )
-
 
   interface Transcript {
     text: string
@@ -96,99 +100,95 @@ export default function MyVideoConference({ handleSend, message, setMessage, mes
   }
 
   return (
-    <div className="flex flex-col lg:flex-row h-full bg-background text-foreground overflow-hidden">
-      <div className="flex-1 flex flex-col bg-background relative">
-        <div className="relative flex-1 p-0">
-          <GridLayout
-            tracks={tracks}
-            style={{ height: "calc(100% - 80px)" }}
-            className="relative z-10 h-full overflow-hidden"
-          >
-            <ParticipantTile className="border border-border bg-card" />
+    <div className="flex h-full flex-col gap-4 lg:flex-row text-foreground">
+      <Card className="flex-1 gap-0 p-0">
+
+
+        <div className="relative flex-1">
+          <GridLayout tracks={tracks} className="relative z-10 h-full overflow-hidden">
+            <ParticipantTile className="border border-border bg-card/70 backdrop-blur-sm" />
           </GridLayout>
         </div>
 
-        <div className="relative border-t border-border bg-card/50 backdrop-blur-sm">
-          <div className="relative z-10">
-            <ControlBar />
-          </div>
+        <div className="border-t border-border/80 bg-card/70 px-4 py-2">
+          <ControlBar />
         </div>
-      </div>
+      </Card>
 
-      <div className="w-full lg:w-80 flex flex-col gap-0 border-t lg:border-t-0 lg:border-l border-border bg-card h-1/2 lg:h-full">
-        <div className="px-4 py-3 border-b border-border bg-card">
+      <Card className="w-full lg:w-80 h-full gap-0 p-0 overflow-hidden">
+        <div className="flex items-center justify-between border-b border-border/80 px-5 py-3">
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-green-500 rounded-full shadow-[0_0_8px_rgba(34,197,94,0.5)]"></div>
-            <span className="text-xs font-medium text-muted-foreground">
-              {status}
-            </span>
+            <Badge variant="secondary" className="text-[11px]">Chat</Badge>
+            <span className="text-xs text-muted-foreground">{status}</span>
           </div>
+          <Badge variant="outline" className="text-[11px]">{messages.length} messages</Badge>
         </div>
-
 
         {transcripts.length > 0 && (
-          <div className="border-b border-border p-3 bg-gradient-to-b from-muted/30 to-transparent">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></div>
-              <span className="text-xs text-muted-foreground font-medium">Live Subtitles</span>
+          <div className="border-b border-border/80 px-5 py-3">
+            <div className="flex items-center justify-between">
+              <Badge variant="outline" className="text-[11px]">Captions</Badge>
+              <span className="text-[11px] text-muted-foreground">Live</span>
             </div>
-            <div className="space-y-1.5 max-h-32 overflow-y-auto">
-              {transcripts.slice(-5).map((t, i) => (
-                <div
-                  key={i}
-                  className={`text-sm leading-relaxed ${t.type === 'PARTIAL'
-                      ? 'text-muted-foreground/70 italic'
-                      : 'text-foreground'
-                    } ${i === transcripts.slice(-5).length - 1 ? 'font-medium' : 'opacity-60'}`}
-                >
-                  {t.text}
-                </div>
-              ))}
-            </div>
+            <ScrollArea className="mt-2 max-h-32 pr-2">
+              <div className="space-y-1.5">
+                {transcripts.slice(-5).map((t, i) => (
+                  <div
+                    key={i}
+                    className={`rounded-md border border-border/70 bg-background/70 px-2.5 py-2 text-sm leading-relaxed ${t.type === "PARTIAL" ? "text-muted-foreground/80 italic" : "text-foreground"}`}
+                  >
+                    <div className="mb-1 flex items-center justify-between text-[11px] text-muted-foreground">
+                      <span className="font-medium">{t.speaker || "Speaker"}</span>
+                      <span className="uppercase tracking-wide">{t.type}</span>
+                    </div>
+                    {t.text}
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
           </div>
         )}
 
-        <div className="flex-1 p-3 bg-card overflow-y-auto min-h-0">
+        <div className="flex-1 px-5 py-3">
           {messages.length === 0 ? (
             <div className="text-muted-foreground text-sm text-center mt-4">No messages yet</div>
           ) : (
-            <ul className="space-y-2">
-              {messages.map((m, i) => (
-                <li
-                  key={i}
-                  className={`flex flex-col gap-1 p-2 rounded-lg text-sm ${m.from === "me" ? "bg-accent text-accent-foreground" : "bg-muted/50 border border-border"
-                    }`}
-                >
-                  <strong className="text-muted-foreground text-xs">{m.from}</strong>
-                  <span className="text-foreground break-words">{m.text}</span>
-                </li>
-              ))}
-            </ul>
+            <ScrollArea className="h-full pr-2">
+              <ul className="space-y-2">
+                {messages.map((m, i) => (
+                  <li
+                    key={i}
+                    className={`flex flex-col gap-1 rounded-xl border px-3 py-2 text-sm ${m.from === "me"
+                        ? "border-primary/40 bg-primary/10 text-foreground"
+                        : "border-border/80 bg-muted/60"
+                      }`}
+                  >
+                    <span className="text-[11px] font-medium text-muted-foreground">{m.from}</span>
+                    <span className="text-foreground break-words leading-relaxed">{m.text}</span>
+                  </li>
+                ))}
+              </ul>
+            </ScrollArea>
           )}
         </div>
 
-        <div className="p-3 border-t border-border bg-card">
-          <div className="flex flex-col gap-2">
-            <input
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Type a message..."
-              className="w-full px-3 py-2 border border-input rounded-md text-sm bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
-            />
-            <button
-              onClick={handleSend}
-              disabled={!message.trim()}
-              className={`px-3 py-2 rounded-md text-xs font-medium transition-all ${message.trim()
-                ? "bg-primary hover:bg-primary/90 text-primary-foreground cursor-pointer"
-                : "bg-muted text-muted-foreground cursor-not-allowed"
-                }`}
-            >
-              Send
-            </button>
-          </div>
+        <div className="flex items-center gap-2 border-t border-border/80 px-5 py-3">
+          <Input
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder="Type a message..."
+          />
+          <Button
+            size="sm"
+            onClick={handleSend}
+            disabled={!message.trim()}
+            className="whitespace-nowrap"
+          >
+            Send
+          </Button>
         </div>
-      </div>
+      </Card>
     </div>
   )
 }

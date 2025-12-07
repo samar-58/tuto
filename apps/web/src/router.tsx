@@ -13,6 +13,9 @@ import { toast } from "sonner";
 import type { AppRouter } from "@tuto/api/routers/index";
 import { TRPCProvider } from "./utils/trpc";
 
+
+
+
 export const queryClient = new QueryClient({
 	queryCache: new QueryCache({
 		onError: (error) => {

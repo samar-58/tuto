@@ -11,13 +11,15 @@ interface RecordingPlayerProps {
     recordingId?: string;
     className?: string;
     meetingId: string;
+    hideActions?: boolean;
 }
 
 export function RecordingPlayer({
     playlistUrl,
     recordingId,
     className = '',
-    meetingId
+    meetingId,
+    hideActions = false
 }: RecordingPlayerProps) {
     const videoRef = useRef<HTMLVideoElement>(null);
     const hlsRef = useRef<Hls | null>(null);
@@ -155,47 +157,51 @@ export function RecordingPlayer({
             <video
                 ref={videoRef}
                 controls
-                className="w-full rounded-lg bg-black"
+                className="w-full h-full rounded-lg bg-black object-contain"
                 playsInline
             />
 
-            <div className="mt-4 flex gap-2">
-                <button
-                    onClick={handleDownload}
-                    disabled={isDownloading || !!error}
-                    className="group flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/30"
-                >
-                    {isDownloading ? (
-                        <>
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                            Downloading...
-                        </>
-                    ) : (
-                        <>
-                            <Download className="w-4 h-4 transition-transform duration-300 group-hover:translate-y-0.5" />
-                            Download Recording
-                        </>
-                    )}
-                </button>
-                <button
-                    onClick={handleExtractAudio}
-                    disabled={isExtractingAudio || !!error}
-                    className="group flex items-center gap-2 px-4 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 hover:scale-105 hover:shadow-lg"
-                >
-                    {isExtractingAudio ? (
-                        <>
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                            Extracting and transcribing...
-                        </>
-                    ) : (
-                        <>
-                            <Music className="w-4 h-4 transition-transform duration-300 group-hover:scale-110" />
-                            Extract Audio (MP3) and Transcribe
-                        </>
-                    )}
-                </button>
-            </div>
-            <SummarizeRoute input={input} setInput={setInput} meetingId={meetingId} />
+            {!hideActions && (
+                <>
+                    <div className="mt-4 flex gap-2">
+                        <button
+                            onClick={handleDownload}
+                            disabled={isDownloading || !!error}
+                            className="group flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/30"
+                        >
+                            {isDownloading ? (
+                                <>
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                    Downloading...
+                                </>
+                            ) : (
+                                <>
+                                    <Download className="w-4 h-4 transition-transform duration-300 group-hover:translate-y-0.5" />
+                                    Download Recording
+                                </>
+                            )}
+                        </button>
+                        <button
+                            onClick={handleExtractAudio}
+                            disabled={isExtractingAudio || !!error}
+                            className="group flex items-center gap-2 px-4 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                        >
+                            {isExtractingAudio ? (
+                                <>
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                    Extracting and transcribing...
+                                </>
+                            ) : (
+                                <>
+                                    <Music className="w-4 h-4 transition-transform duration-300 group-hover:scale-110" />
+                                    Extract Audio (MP3) and Transcribe
+                                </>
+                            )}
+                        </button>
+                    </div>
+                    <SummarizeRoute input={input} setInput={setInput} meetingId={meetingId} />
+                </>
+            )}
         </div>
     );
 }
