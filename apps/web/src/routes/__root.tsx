@@ -15,10 +15,7 @@ import type { QueryClient } from "@tanstack/react-query";
 import type { TRPCOptionsProxy } from "@trpc/tanstack-react-query";
 import type { AppRouter } from "@tuto/api/routers/index";
 import { ThemeProvider } from "@/components/theme-provider";
-
-if (import.meta.env.DEV) {
-	import("react-grab");
-}
+import { useEffect } from "react";
 
 export interface RouterAppContext {
 	trpc: TRPCOptionsProxy<AppRouter>;
@@ -53,15 +50,17 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 });
 
 function RootDocument() {
+	// Load react-grab only on client side in development
+	useEffect(() => {
+		if (import.meta.env.DEV && typeof window !== "undefined") {
+			import("react-grab");
+		}
+	}, []);
+
 	return (
 		<html lang="en" className="dark">
 			<head>
 				<HeadContent />
-				{import.meta.env.DEV && (
-					<script type="module">
-						{`import("react-grab");`}
-					</script>
-				)}
 			</head>
 			<body>
 				<ThemeProvider> 
