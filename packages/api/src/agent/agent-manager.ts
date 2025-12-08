@@ -37,9 +37,8 @@ class AgentManager {
                 AGENT_TOKEN: agentToken,
             };
 
-            // Spawn the agent process using full bun path
-            const bunPath = process.env.BUN_PATH || '/Users/samarsayed/.bun/bin/bun';
-            const agentProcess = spawn(bunPath, ['run', 'dev'], {
+            // Spawn the agent process
+            const agentProcess = spawn('bun', ['run', 'dev'], {
                 cwd: process.cwd() + '/packages/agent',
                 env,
                 stdio: ['ignore', 'pipe', 'pipe'],
